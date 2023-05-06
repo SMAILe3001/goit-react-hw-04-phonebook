@@ -1,17 +1,34 @@
 import { Component } from 'react';
 import { nanoid } from 'nanoid';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
+import { Container } from './App.styled';
 import { ContactForm } from '../ContactForm';
 import { Filter } from '../Filter';
 import { ContactList } from '../ContactList';
+import { AddDemoContact } from 'components/AddDemoContact';
+
 import contactListDemo from '../../data/contactsList';
-import { Container } from './App.styled';
 
 export class App extends Component {
   state = {
-    contacts: contactListDemo,
+    contacts: [],
     filter: '',
   };
+
+  componentDidMount() {
+    const contacts = localStorage.getItem('contacts');
+    const parsedContacts = JSON.parse(contacts);
+    if (parsedContacts) {
+      this.setState({ contacts: parsedContacts });
+    }
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    const { contacts } = this.state;
+    if (contacts !== prevState.contacts) {
+      localStorage.setItem('contacts', JSON.stringify(contacts));
+    }
+  }
 
   sabmitForm = e => {
     const { contacts } = this.state;
@@ -32,7 +49,19 @@ export class App extends Component {
       contacts: [contact, ...prevState.contacts],
     }));
 
+    if (this.state.filter) {
+      this.setState({
+        filter: '',
+      });
+    }
+
     this.alarmAddContact(data.name);
+  };
+
+  addDemoContact = () => {
+    this.setState(() => ({
+      contacts: contactListDemo,
+    }));
   };
 
   deleteContact = id => {
@@ -70,21 +99,6 @@ export class App extends Component {
     Notify.info(`Contact ${object.name} delit.`);
   };
 
-  componentDidMount() {
-    const contacts = localStorage.getItem('contacts');
-    const parsedContacts = JSON.parse(contacts);
-    if (parsedContacts) {
-      this.setState({ contacts: parsedContacts });
-    }
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    const { contacts } = this.state;
-    if (contacts !== prevState.contacts) {
-      localStorage.setItem('contacts', JSON.stringify(contacts));
-    }
-  }
-
   render() {
     const { filter } = this.state;
     const { sabmitForm, filterContacts, getVisibleContact, deleteContact } =
@@ -92,6 +106,7 @@ export class App extends Component {
 
     return (
       <Container>
+        <AddDemoContact onClick={this.addDemoContact} />
         <div>
           <h1>Phonebook</h1>
           <ContactForm onSubmit={sabmitForm} />
