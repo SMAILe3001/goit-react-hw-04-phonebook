@@ -70,19 +70,36 @@ export class App extends Component {
     Notify.info(`Contact ${object.name} delit.`);
   };
 
+  componentDidMount() {
+    const contacts = localStorage.getItem('contacts');
+    const parsedContacts = JSON.parse(contacts);
+    if (parsedContacts) {
+      this.setState({ contacts: parsedContacts });
+    }
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    const { contacts } = this.state;
+    if (contacts !== prevState.contacts) {
+      localStorage.setItem('contacts', JSON.stringify(contacts));
+    }
+  }
+
   render() {
     const { filter } = this.state;
+    const { sabmitForm, filterContacts, getVisibleContact, deleteContact } =
+      this;
 
     return (
       <Container>
         <div>
           <h1>Phonebook</h1>
-          <ContactForm onSubmit={this.sabmitForm} />
+          <ContactForm onSubmit={sabmitForm} />
           <h2>Contacts</h2>
-          <Filter onChange={this.filterContacts} value={filter} />
+          <Filter onChange={filterContacts} value={filter} />
           <ContactList
-            contactList={this.getVisibleContact()}
-            onDeleted={this.deleteContact}
+            contactList={getVisibleContact()}
+            onDeleted={deleteContact}
           />
         </div>
       </Container>
