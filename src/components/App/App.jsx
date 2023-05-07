@@ -20,17 +20,25 @@ export class App extends Component {
   };
 
   componentDidMount() {
-    const contacts = localStorage.getItem('contacts');
-    const parsedContacts = JSON.parse(contacts);
-    if (parsedContacts) {
-      this.setState({ contacts: parsedContacts });
+    const saveContacts = JSON.parse(localStorage.getItem('contacts'));
+    const saveTheme = JSON.parse(localStorage.getItem('theme'));
+
+    if (saveContacts) {
+      this.setState({ contacts: saveContacts });
+    }
+    if (saveTheme) {
+      this.setState({ theme: saveTheme });
     }
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    const { contacts } = this.state;
+  componentDidUpdate(_, prevState) {
+    const { contacts, theme } = this.state;
+
     if (contacts !== prevState.contacts) {
       localStorage.setItem('contacts', JSON.stringify(contacts));
+    }
+    if (theme !== prevState.theme) {
+      localStorage.setItem('theme', JSON.stringify(theme));
     }
   }
 
