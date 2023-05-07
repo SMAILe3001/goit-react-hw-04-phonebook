@@ -9,7 +9,7 @@ export const Title = styled.h3`
 export const Input = styled.input`
   height: 30px;
   border-radius: 7px;
-  border: 2px solid rgb(132 156 231);
+  border: ${props => `2px solid ${props.theme.colors.accent}`};
   display: block;
   font-size: 24px;
   padding-left: 8px;

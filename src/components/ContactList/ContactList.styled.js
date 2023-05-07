@@ -9,17 +9,17 @@ export const Item = styled.li`
   display: flex;
   justify-content: space-between;
   border-radius: 7px;
-  border: 2px solid rgb(132 156 231);
+  border: ${props => `2px solid ${props.theme.colors.accent}`};
   margin-bottom: 4px;
   padding-left: 8px;
 `;
 
 export const Button = styled.button`
-  background-color: rgb(132 156 231);
+  background-color: ${props => props.theme.colors.accent};
   font-size: 20px;
   border: none;
   border-radius: 4px;
   &:hover {
-    background-color: rgb(255 74 74);
+    background-color: ${props => props.theme.colors.danger};
   }
 `;

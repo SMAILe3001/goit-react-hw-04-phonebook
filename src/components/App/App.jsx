@@ -1,18 +1,22 @@
 import { Component } from 'react';
 import { nanoid } from 'nanoid';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
+import { ThemeProvider } from '@emotion/react';
 import { Container } from './App.styled';
 import { ContactForm } from '../ContactForm';
 import { Filter } from '../Filter';
 import { ContactList } from '../ContactList';
-import { AddDemoContact } from 'components/AddDemoContact';
+import { Button } from 'components/Button';
 
+import { DARK, LIGHT } from 'constants/theme';
+import { theme } from 'theme';
 import contactListDemo from '../../data/contactsList';
 
 export class App extends Component {
   state = {
     contacts: [],
     filter: '',
+    theme: LIGHT,
   };
 
   componentDidMount() {
@@ -85,6 +89,13 @@ export class App extends Component {
     );
   };
 
+  togleTheme = () => {
+    this.setState(prevState => ({
+      theme: prevState.theme === LIGHT ? DARK : LIGHT,
+      customText: 'Custom text',
+    }));
+  };
+
   alarmDuplicatioContact = name => {
     Notify.warning(`${name} is already in contacts.`);
   };
@@ -101,23 +112,33 @@ export class App extends Component {
 
   render() {
     const { filter } = this.state;
-    const { sabmitForm, filterContacts, getVisibleContact, deleteContact } =
-      this;
+    const {
+      sabmitForm,
+      filterContacts,
+      getVisibleContact,
+      deleteContact,
+      togleTheme,
+    } = this;
 
     return (
-      <Container>
-        <AddDemoContact onClick={this.addDemoContact} />
-        <div>
-          <h1>Phonebook</h1>
-          <ContactForm onSubmit={sabmitForm} />
-          <h2>Contacts</h2>
-          <Filter onChange={filterContacts} value={filter} />
-          <ContactList
-            contactList={getVisibleContact()}
-            onDeleted={deleteContact}
-          />
-        </div>
-      </Container>
+      <ThemeProvider theme={theme[this.state.theme]}>
+        <Container>
+          <div>
+            <Button onClick={this.addDemoContact} text={'demo contacts'} />
+            <Button onClick={togleTheme} text={'togle theme'} />
+          </div>
+          <div>
+            <h1>Phonebook</h1>
+            <ContactForm onSubmit={sabmitForm} />
+            <h2>Contacts</h2>
+            <Filter onChange={filterContacts} value={filter} />
+            <ContactList
+              contactList={getVisibleContact()}
+              onDeleted={deleteContact}
+            />
+          </div>
+        </Container>
+      </ThemeProvider>
     );
   }
 }
