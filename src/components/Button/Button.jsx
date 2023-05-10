@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import { ButtonStyle } from './Button.styled';
 
 export function Button({ onClick, text }) {
@@ -7,3 +8,8 @@ export function Button({ onClick, text }) {
     </ButtonStyle>
   );
 }
+
+Button.propType = {
+  onClick: PropTypes.func,
+  text: PropTypes.string,
+};
