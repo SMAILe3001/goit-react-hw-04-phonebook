@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useEffect, useState } from 'react';
 import { nanoid } from 'nanoid';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import { ThemeProvider } from '@emotion/react';
@@ -12,38 +12,24 @@ import { DARK, LIGHT } from 'constants/theme';
 import { theme } from 'theme';
 import contactListDemo from '../../data/contactsList';
 
-export class App extends Component {
-  state = {
-    contacts: [],
-    filter: '',
-    theme: LIGHT,
+export function App() {
+  const [contacts, setContacts] = useState(
+    () => JSON.parse(window.localStorage.getItem('contacts')) ?? []
+  );
+  const [filter, setFilter] = useState('');
+  const [activeTheme, setActiveTheme] = useState(
+    () => JSON.parse(window.localStorage.getItem('theme')) ?? LIGHT
+  );
+
+  const addDemoContact = () => {
+    setContacts(() => [...contactListDemo]);
   };
 
-  componentDidMount() {
-    const saveContacts = JSON.parse(localStorage.getItem('contacts'));
-    const saveTheme = JSON.parse(localStorage.getItem('theme'));
+  const togleTheme = () => {
+    setActiveTheme(activeTheme === LIGHT ? DARK : LIGHT);
+  };
 
-    if (saveContacts) {
-      this.setState({ contacts: saveContacts });
-    }
-    if (saveTheme) {
-      this.setState({ theme: saveTheme });
-    }
-  }
-
-  componentDidUpdate(_, prevState) {
-    const { contacts, theme } = this.state;
-
-    if (contacts !== prevState.contacts) {
-      localStorage.setItem('contacts', JSON.stringify(contacts));
-    }
-    if (theme !== prevState.theme) {
-      localStorage.setItem('theme', JSON.stringify(theme));
-    }
-  }
-
-  sabmitForm = e => {
-    const { contacts } = this.state;
+  const sabmitForm = e => {
     const { name } = e;
 
     const normalizedFilter = name.toLowerCase();
@@ -51,102 +37,78 @@ export class App extends Component {
       contact => contact.name.toLowerCase() !== normalizedFilter
     );
 
-    contactСheck ? this.addContact(e) : this.alarmDuplicatioContact(name);
+    contactСheck ? addContact(e) : alarmDuplicatioContact(name);
   };
 
-  addContact = data => {
+  const alarmDuplicatioContact = name => {
+    Notify.warning(`${name} is already in contacts.`);
+  };
+
+  const addContact = data => {
     const contact = { id: nanoid(), ...data };
 
-    this.setState(prevState => ({
-      contacts: [contact, ...prevState.contacts],
-    }));
+    setContacts([contact, ...contacts]);
 
-    if (this.state.filter) {
-      this.setState({
-        filter: '',
-      });
+    if (filter !== '') {
+      setFilter('');
     }
 
-    this.alarmAddContact(data.name);
+    alarmAddContact(data.name);
   };
 
-  addDemoContact = () => {
-    this.setState(() => ({
-      contacts: contactListDemo,
-    }));
+  const alarmAddContact = name => {
+    Notify.success(`Contact ${name} add.`);
   };
 
-  deleteContact = id => {
-    this.setState(prevState => ({
-      contacts: prevState.contacts.filter(contact => contact.id !== id),
-    }));
-
-    this.alarmDeleteContact(id);
+  const filterContacts = e => {
+    setFilter(e.currentTarget.value);
   };
 
-  filterContacts = e => {
-    this.setState({ filter: e.currentTarget.value });
-  };
-
-  getVisibleContact = () => {
-    const { filter, contacts } = this.state;
-
+  const getVisibleContact = () => {
     const normalizedFilter = filter.toLowerCase();
     return contacts.filter(contact =>
       contact.name.toLowerCase().includes(normalizedFilter)
     );
   };
 
-  togleTheme = () => {
-    this.setState(prevState => ({
-      theme: prevState.theme === LIGHT ? DARK : LIGHT,
-      customText: 'Custom text',
-    }));
+  const deleteContact = id => {
+    setContacts(contacts.filter(contact => contact.id !== id));
+
+    alarmDeleteContact(id);
   };
 
-  alarmDuplicatioContact = name => {
-    Notify.warning(`${name} is already in contacts.`);
-  };
-
-  alarmAddContact = name => {
-    Notify.success(`Contact ${name} add.`);
-  };
-
-  alarmDeleteContact = id => {
-    let object = this.state.contacts.find(elem => elem.id === id);
+  const alarmDeleteContact = id => {
+    let object = contacts.find(elem => elem.id === id);
 
     Notify.info(`Contact ${object.name} delit.`);
   };
 
-  render() {
-    const { filter } = this.state;
-    const {
-      sabmitForm,
-      filterContacts,
-      getVisibleContact,
-      deleteContact,
-      togleTheme,
-    } = this;
+  useEffect(() => {
+    window.localStorage.setItem('contacts', JSON.stringify(contacts));
+  }, [contacts]);
 
-    return (
-      <ThemeProvider theme={theme[this.state.theme]}>
-        <Container>
-          <div>
-            <Button onClick={this.addDemoContact} text={'demo contacts'} />
-            <Button onClick={togleTheme} text={'togle theme'} />
-          </div>
-          <div>
-            <h1>Phonebook</h1>
-            <ContactForm onSubmit={sabmitForm} />
-            <h2>Contacts</h2>
-            <Filter onChange={filterContacts} value={filter} />
-            <ContactList
-              contactList={getVisibleContact()}
-              onDeleted={deleteContact}
-            />
-          </div>
-        </Container>
-      </ThemeProvider>
-    );
-  }
+  useEffect(() => {
+    window.localStorage.setItem('theme', JSON.stringify(activeTheme));
+  }, [activeTheme]);
+
+  return (
+    <ThemeProvider theme={theme[activeTheme]}>
+      <Container>
+        <div>
+          <Button onClick={addDemoContact} text={'demo contacts'} />
+          <Button onClick={togleTheme} text={'togle theme'} />
+        </div>
+        <div>
+          <h1>Phonebook</h1>
+          <ContactForm onSubmit={sabmitForm} />
+          <h2>Contacts</h2>
+          <Filter onChange={filterContacts} value={filter} />
+          <ContactList
+            contactList={getVisibleContact()}
+            onDeleted={deleteContact}
+          />
+        </div>
+      </Container>
+    </ThemeProvider>
+  );
 }
