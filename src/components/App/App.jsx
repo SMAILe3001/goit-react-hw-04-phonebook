@@ -12,7 +12,7 @@ import { DARK, LIGHT } from 'constants/theme';
 import { theme } from 'theme';
 import contactListDemo from '../../data/contactsList';
 
-export function App() {
+export const App = () => {
   const [contacts, setContacts] = useState(
     () => JSON.parse(window.localStorage.getItem('contacts')) ?? []
   );
@@ -111,4 +111,4 @@ export function App() {
       </Container>
     </ThemeProvider>
   );
-}
+};
